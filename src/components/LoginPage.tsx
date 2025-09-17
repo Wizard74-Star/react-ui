@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
 import { Microsoft365Service } from '../services/teamsService';
 import {
   Button,
   Text,
-  Body1,
-  Caption1,
+  Input,
+  Field,
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
@@ -14,15 +14,18 @@ import {
   Card,
   makeStyles,
   tokens,
+  Divider,
 } from '@fluentui/react-components';
 import { 
-  PersonRegular, 
+  PersonRegular,
+  EyeRegular,
+  EyeOffRegular,
 } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
-    height: '100vh', // Fixed viewport height
+    height: '100vh',
     justifyContent: 'center',
     alignItems: 'center',
     background: `linear-gradient(135deg, 
@@ -32,10 +35,7 @@ const useStyles = makeStyles({
       #fff3e0 75%, 
       #fce4ec 100%)`,
     position: 'relative',
-    overflow: 'hidden', // No page scroll
-  },
-  leftPanel: {
-    display: 'none', // Hide for Microsoft-style centered design
+    overflow: 'hidden',
   },
   rightPanel: {
     display: 'flex',
@@ -45,28 +45,6 @@ const useStyles = makeStyles({
     width: '100%',
     maxWidth: '440px',
     padding: tokens.spacingVerticalXL,
-  },
-  logo: {
-    width: '120px',
-    height: '120px',
-    marginBottom: tokens.spacingVerticalXL,
-    borderRadius: tokens.borderRadiusLarge,
-    backgroundColor: tokens.colorNeutralForegroundOnBrand,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: tokens.shadow16,
-  },
-  title: {
-    textAlign: 'center',
-    marginBottom: tokens.spacingVerticalL,
-    fontWeight: tokens.fontWeightBold,
-  },
-  subtitle: {
-    textAlign: 'center',
-    maxWidth: '500px',
-    lineHeight: '1.6',
-    opacity: 0.9,
   },
   loginCard: {
     width: '100%',
@@ -98,49 +76,33 @@ const useStyles = makeStyles({
   },
   button: {
     width: '100%',
-    marginBottom: tokens.spacingVerticalL,
+    marginBottom: tokens.spacingVerticalM,
     height: '44px',
     borderRadius: tokens.borderRadiusMedium,
   },
-  environmentInfo: {
-    textAlign: 'center',
-    marginTop: tokens.spacingVerticalL,
-    padding: tokens.spacingVerticalM,
-    backgroundColor: tokens.colorNeutralBackground2,
-    borderRadius: tokens.borderRadiusMedium,
-    border: `1px solid ${tokens.colorNeutralStroke1}`,
-  },
-  features: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: tokens.spacingVerticalL,
-    marginTop: tokens.spacingVerticalXXL,
-    maxWidth: '600px',
-  },
-  feature: {
+  loginForm: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    textAlign: 'center',
-    padding: tokens.spacingVerticalL,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: tokens.borderRadiusMedium,
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    transition: 'all 0.3s ease',
+    gap: tokens.spacingVerticalM,
+    textAlign: 'left',
+    marginTop: tokens.spacingVerticalL,
+  },
+  passwordField: {
+    position: 'relative',
+  },
+  passwordToggle: {
+    position: 'absolute',
+    right: '8px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '4px',
+    color: tokens.colorNeutralForeground3,
     '&:hover': {
-      transform: 'translateY(-4px)',
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+      color: tokens.colorNeutralForeground2,
     },
-  },
-  featureIcon: {
-    fontSize: '32px',
-    marginBottom: tokens.spacingVerticalM,
-    color: tokens.colorNeutralForegroundOnBrand,
-  },
-  featureText: {
-    fontWeight: tokens.fontWeightSemibold,
-    fontSize: '14px',
   },
   welcomeSection: {
     textAlign: 'center',
@@ -172,23 +134,34 @@ const useStyles = makeStyles({
       backgroundColor: '#f3f2f1',
     },
   },
-  backgroundPattern: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    opacity: 0.1,
-    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-    pointerEvents: 'none',
+  divider: {
+    margin: `${tokens.spacingVerticalL} 0`,
+  },
+  demoInfo: {
+    backgroundColor: tokens.colorNeutralBackground2,
+    padding: tokens.spacingVerticalM,
+    borderRadius: tokens.borderRadiusMedium,
+    marginTop: tokens.spacingVerticalM,
+    textAlign: 'left',
+  },
+  demoCredentials: {
+    fontSize: '12px',
+    color: tokens.colorNeutralForeground3,
+    marginTop: tokens.spacingVerticalXS,
+    fontFamily: 'monospace',
   },
 });
 
 const LoginPage: React.FC = () => {
-  const { login, isLoading, error, isAuthenticated } = useAuth();
+  const { login, demoLogin, isLoading, error, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const microsoft365Service = Microsoft365Service.getInstance();
   const styles = useStyles();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginMode, setLoginMode] = useState<'demo' | 'form'>('demo');
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
@@ -197,18 +170,33 @@ const LoginPage: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleLogin = async () => {
+  const handleDemoLogin = async () => {
     try {
-      await login();
-      // Navigation will be handled by the useEffect above when isAuthenticated becomes true
+      await demoLogin();
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Demo login error:', error);
     }
+  };
+
+  const handleFormLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      return;
+    }
+
+    try {
+      await login({ email, password });
+    } catch (error) {
+      console.error('Form login error:', error);
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
     <div className={styles.container}>
-      {/* Microsoft-style centered modal */}
       <div className={styles.rightPanel}>
         <Card className={styles.loginCard}>
           {/* Back button */}
@@ -232,10 +220,10 @@ const LoginPage: React.FC = () => {
           {/* Main Content */}
           <div className={styles.welcomeSection}>
             <div className={styles.welcomeTitle}>Sign in</div>
-            <br/><br/>
-            <Body1 className={styles.welcomeSubtitle}>
+            <br/>
+            <Text className={styles.welcomeSubtitle}>
               to continue to your BMS Teams App
-            </Body1>
+            </Text>
           </div>
 
           {error && (
@@ -247,13 +235,14 @@ const LoginPage: React.FC = () => {
             </MessageBar>
           )}
 
+          {/* Demo Login Button */}
           <Button
             appearance="primary"
             size="large"
             className={styles.button}
-            onClick={handleLogin}
+            onClick={handleDemoLogin}
             disabled={isLoading}
-            icon={isLoading ? <Spinner size="tiny" /> : <PersonRegular />}
+            icon={isLoading && loginMode === 'demo' ? <Spinner size="tiny" /> : <PersonRegular />}
             style={{
               backgroundColor: '#0078d4',
               borderColor: '#0078d4',
@@ -261,17 +250,79 @@ const LoginPage: React.FC = () => {
               fontWeight: '600',
             }}
           >
-            {isLoading ? 'Signing in...' : 'Sign in with Microsoft 365'}
+            {isLoading && loginMode === 'demo' ? 'Signing in...' : 'Quick Demo Login'}
           </Button>
 
-          {/* <div style={{ textAlign: 'center', marginTop: tokens.spacingVerticalL }}>
-            <Text style={{ fontSize: '13px', color: '#605e5c' }}>
-              New to Microsoft? <a href="#" style={{ color: '#0078d4', textDecoration: 'none' }}>Create an account</a>
-            </Text>
-          </div> */}
+          <Divider className={styles.divider}>or</Divider>
 
-          <div className={styles.environmentInfo}>
-            <Caption1>
+          {/* Login Form */}
+          <form onSubmit={handleFormLogin} className={styles.loginForm}>
+            <Field label="Email">
+              <Input
+                type="email"
+                value={email}
+                onChange={(_, data) => setEmail(data.value)}
+                placeholder="Enter your email"
+                required
+                disabled={isLoading}
+              />
+            </Field>
+            
+            <Field label="Password">
+              <div className={styles.passwordField}>
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(_, data) => setPassword(data.value)}
+                  placeholder="Enter your password"
+                  required
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={togglePasswordVisibility}
+                  disabled={isLoading}
+                >
+                  {showPassword ? <EyeOffRegular /> : <EyeRegular />}
+                </button>
+              </div>
+            </Field>
+
+            <Button
+              type="submit"
+              appearance="secondary"
+              size="large"
+              className={styles.button}
+              disabled={isLoading || !email || !password}
+              icon={isLoading && loginMode === 'form' ? <Spinner size="tiny" /> : undefined}
+              onClick={() => setLoginMode('form')}
+            >
+              {isLoading && loginMode === 'form' ? 'Signing in...' : 'Sign in with Credentials'}
+            </Button>
+          </form>
+
+          {/* Demo Information */}
+          <div className={styles.demoInfo}>
+            <Text size={200} weight="semibold">Demo Credentials</Text>
+            <div className={styles.demoCredentials}>
+              Email: john.smith@company.com<br/>
+              Email: sarah.johnson@company.com<br/>
+              Email: michael.brown@company.com<br/>
+              Password: password (or "demo")
+            </div>
+          </div>
+
+          {/* Environment Info */}
+          <div style={{ 
+            textAlign: 'center', 
+            marginTop: tokens.spacingVerticalL,
+            padding: tokens.spacingVerticalM,
+            backgroundColor: tokens.colorNeutralBackground2,
+            borderRadius: tokens.borderRadiusMedium,
+            border: `1px solid ${tokens.colorNeutralStroke1}`,
+          }}>
+            <Text size={200}>
               {microsoft365Service.isInitialized() ? (
                 <div>
                   <Text weight="semibold" style={{ fontSize: '13px' }}>Connected to Microsoft 365</Text>
@@ -290,7 +341,7 @@ const LoginPage: React.FC = () => {
               ) : (
                 <Text style={{ fontSize: '13px' }}>Running in web browser</Text>
               )}
-            </Caption1>
+            </Text>
           </div>
         </Card>
       </div>

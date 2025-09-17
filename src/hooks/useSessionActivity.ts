@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { AuthService } from '../services/authService';
+import { SimpleAuthService } from '../services/simpleAuthService';
 import { SessionStorageService } from '../services/sessionStorageService';
 
 interface UseSessionActivityOptions {
@@ -20,7 +20,7 @@ export const useSessionActivity = (options: UseSessionActivityOptions = {}) => {
 
   const lastActivityRef = useRef<number>(Date.now());
   const extendTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const authService = AuthService.getInstance();
+  const authService = SimpleAuthService.getInstance();
 
   useEffect(() => {
     if (!enabled) return;

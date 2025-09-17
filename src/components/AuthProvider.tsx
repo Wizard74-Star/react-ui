@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { AuthService, UserProfile } from '../services/authService';
+import { SimpleAuthService, UserProfile, LoginCredentials } from '../services/simpleAuthService';
 import { Microsoft365Service } from '../services/teamsService';
 import { SessionStorageService } from '../services/sessionStorageService';
 import { useSessionActivity } from '../hooks/useSessionActivity';
@@ -8,7 +8,8 @@ interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: () => Promise<void>;
+  login: (credentials?: LoginCredentials) => Promise<void>;
+  demoLogin: () => Promise<void>;
   logout: () => Promise<void>;
   error: string | null;
   sessionInfo: ReturnType<typeof SessionStorageService.getSessionInfo>;
@@ -27,7 +28,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
   const [sessionInfo, setSessionInfo] = useState(() => SessionStorageService.getSessionInfo());
 
-  const authService = AuthService.getInstance();
+  const authService = SimpleAuthService.getInstance();
   const microsoft365Service = Microsoft365Service.getInstance();
 
   // Use session activity hook to monitor user activity
@@ -44,7 +45,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         // Initialize services
         await authService.initialize();
-        await microsoft365Service.initialize();
+        // Microsoft365Service is optional for simple auth
+        try {
+          await microsoft365Service.initialize();
+        } catch (error) {
+          console.log('Microsoft 365 service not available, continuing with simple auth');
+        }
 
         // Check if user is already authenticated
         if (authService.isAuthenticated()) {
@@ -73,12 +79,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const login = async () => {
+  const login = async (credentials?: LoginCredentials) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const userProfile = await authService.login();
+      const userProfile = await authService.login(credentials);
       setUser(userProfile);
       setSessionInfo(SessionStorageService.getSessionInfo());
 
@@ -88,11 +94,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error('Login failed:', error);
-      setError('Login failed. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Login failed. Please try again.';
+      setError(errorMessage);
       
       // Show error notification in Microsoft 365
       if (microsoft365Service.isInitialized()) {
-        await microsoft365Service.showNotification('Login failed. Please try again.', 'error');
+        await microsoft365Service.showNotification(errorMessage, 'error');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const demoLogin = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const userProfile = await authService.demoLogin();
+      setUser(userProfile);
+      setSessionInfo(SessionStorageService.getSessionInfo());
+
+      // Show success notification in Microsoft 365
+      if (microsoft365Service.isInitialized()) {
+        await microsoft365Service.showNotification('Successfully logged in with demo account!', 'success');
+      }
+    } catch (error) {
+      console.error('Demo login failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Demo login failed. Please try again.';
+      setError(errorMessage);
+      
+      // Show error notification in Microsoft 365
+      if (microsoft365Service.isInitialized()) {
+        await microsoft365Service.showNotification(errorMessage, 'error');
       }
     } finally {
       setIsLoading(false);
@@ -130,6 +164,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     isAuthenticated: user !== null,
     login,
+    demoLogin,
     logout,
     error,
     sessionInfo,

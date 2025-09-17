@@ -1,4 +1,4 @@
-import { UserProfile } from './authService';
+import { UserProfile } from './simpleAuthService';
 
 export interface AuthSession {
   user: UserProfile;
