@@ -1,0 +1,89 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.16",
+  "version": "1.0.0",
+  "id": "YOUR_TEAMS_APP_ID",
+  "packageName": "com.transformr.bms.teamsapp",
+  "developer": {
+    "name": "Transformr",
+    "websiteUrl": "https://www.transformr.com.au",
+    "privacyUrl": "https://www.transformr.com.au/privacy",
+    "termsOfUseUrl": "https://www.transformr.com.au/terms"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "BMS Teams App",
+    "full": "BMS SharePoint Document Management Teams App"
+  },
+  "description": {
+    "short": "Centralized SharePoint document management for BMS",
+    "full": "A Teams app for managing SharePoint document management functions including site columns, approval processes, and enhanced search capabilities for the BMS implementation."
+  },
+  "accentColor": "#0078D4",
+  "bots": [],
+  "composeExtensions": [],
+  "configurableTabs": [
+    {
+      "configurationUrl": "https://YOUR_APP_URL.azurewebsites.net/config",
+      "canUpdateConfiguration": true,
+      "scopes": [
+        "team",
+        "groupchat"
+      ]
+    }
+  ],
+  "staticTabs": [
+    {
+      "entityId": "dashboard",
+      "name": "Dashboard",
+      "contentUrl": "https://YOUR_APP_URL.azurewebsites.net/dashboard",
+      "websiteUrl": "https://YOUR_APP_URL.azurewebsites.net/dashboard",
+      "scopes": [
+        "personal"
+      ]
+    },
+    {
+      "entityId": "approvers",
+      "name": "Document Approvers",
+      "contentUrl": "https://YOUR_APP_URL.azurewebsites.net/approvers",
+      "websiteUrl": "https://YOUR_APP_URL.azurewebsites.net/approvers",
+      "scopes": [
+        "personal"
+      ]
+    },
+    {
+      "entityId": "metrics",
+      "name": "Review Metrics",
+      "contentUrl": "https://YOUR_APP_URL.azurewebsites.net/metrics",
+      "websiteUrl": "https://YOUR_APP_URL.azurewebsites.net/metrics",
+      "scopes": [
+        "personal"
+      ]
+    },
+    {
+      "entityId": "approvals",
+      "name": "My Approvals",
+      "contentUrl": "https://YOUR_APP_URL.azurewebsites.net/approvals",
+      "websiteUrl": "https://YOUR_APP_URL.azurewebsites.net/approvals",
+      "scopes": [
+        "personal"
+      ]
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "YOUR_APP_URL.azurewebsites.net",
+    "login.microsoftonline.com",
+    "graph.microsoft.com"
+  ],
+  "webApplicationInfo": {
+    "id": "YOUR_CLIENT_ID",
+    "resource": "https://graph.microsoft.com"
+  }
+}
