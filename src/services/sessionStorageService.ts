@@ -15,6 +15,8 @@ export class SessionStorageService {
   private static readonly USER_KEY = 'bms_user_profile';
   private static readonly SESSION_TIMEOUT = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
 
+
+  
   /**
    * Save authentication session to session storage
    */

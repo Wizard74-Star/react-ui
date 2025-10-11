@@ -14,6 +14,8 @@ export class Microsoft365Service {
 
   private constructor() {}
 
+
+  
   public static getInstance(): Microsoft365Service {
     if (!Microsoft365Service.instance) {
       Microsoft365Service.instance = new Microsoft365Service();

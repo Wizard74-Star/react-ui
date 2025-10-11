@@ -16,6 +16,7 @@ interface AuthContextType {
   extendSession: () => void;
 }
 
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
@@ -31,7 +32,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const authService = SimpleAuthService.getInstance();
   const microsoft365Service = Microsoft365Service.getInstance();
 
-  // Use session activity hook to monitor user activity
   const { extendSession: extendSessionHook } = useSessionActivity({
     enabled: user !== null,
     extendThreshold: 30, // Extend session when 30 minutes remain

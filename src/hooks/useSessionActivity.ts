@@ -8,9 +8,6 @@ interface UseSessionActivityOptions {
   activityEvents?: string[];
 }
 
-/**
- * Hook to monitor user activity and automatically extend session
- */
 export const useSessionActivity = (options: UseSessionActivityOptions = {}) => {
   const {
     enabled = true,

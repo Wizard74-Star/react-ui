@@ -13,6 +13,8 @@ export interface UserProfile {
   department?: string;
 }
 
+
+
 export class AuthService {
   private static instance: AuthService;
   private msalInstance: PublicClientApplication;

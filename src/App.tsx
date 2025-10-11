@@ -14,6 +14,8 @@ import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
+
+  
   if (isLoading) {
     return (
       <div style={{

@@ -15,6 +15,8 @@ export interface LoginCredentials {
   password: string;
 }
 
+
+
 // Mock user database for demo purposes
 const DEMO_USERS: UserProfile[] = [
   {
