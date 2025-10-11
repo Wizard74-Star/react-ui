@@ -11,6 +11,7 @@ A Microsoft 365 application for centralized SharePoint document management, buil
 - **Outstanding Approvals**: View and manage pending approvals
 - **SharePoint Integration**: Full SharePoint REST API integration
 
+## Pre
 ## Prerequisites
 
 - Node.js (v16 or higher)
